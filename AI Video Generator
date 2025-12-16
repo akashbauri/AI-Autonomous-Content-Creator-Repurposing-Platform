@@ -1,0 +1,4 @@
+def generate_ai_video(script):
+    # Placeholder for D-ID / HeyGen / etc.
+    # Returns video URL
+    return "https://sample-videos.com/video123.mp4"
