@@ -1,21 +1,33 @@
 from fpdf import FPDF
 
+class UnicodePDF(FPDF):
+    pass
+
+
 def generate_pdf(content_dict):
-    pdf = FPDF()
-    pdf.add_page()
+    pdf = UnicodePDF()
     pdf.set_auto_page_break(auto=True, margin=15)
+    pdf.add_page()
 
-    pdf.set_font("Arial", "B", 16)
-    pdf.cell(0, 10, "AI Content Report", ln=True)
+    # Use a Unicode-safe core font
+    pdf.set_font("Helvetica", size=11)
 
-    pdf.set_font("Arial", size=10)
-    pdf.cell(0, 8, "Developed by Akash Bauri\n\n", ln=True)
+    pdf.multi_cell(
+        0,
+        8,
+        "AI Content Report\n"
+        "Developed by Akash Bauri\n"
+        "AI Engineer | Multi-Agent Systems | LLM Automation\n\n"
+    )
 
     for section, text in content_dict.items():
-        pdf.set_font("Arial", "B", 12)
+        pdf.set_font("Helvetica", "B", 13)
         pdf.cell(0, 8, section, ln=True)
-        pdf.set_font("Arial", size=10)
-        pdf.multi_cell(0, 7, text)
-        pdf.ln(3)
+        pdf.ln(2)
 
-    return pdf.output(dest="S").encode("latin-1")
+        pdf.set_font("Helvetica", size=11)
+        pdf.multi_cell(0, 8, text)
+        pdf.ln(4)
+
+    # ✅ UTF-8 SAFE OUTPUT (NO latin-1)
+    return pdf.output(dest="S").encode("utf-8")
