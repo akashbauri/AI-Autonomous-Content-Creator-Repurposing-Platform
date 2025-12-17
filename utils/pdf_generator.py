@@ -14,11 +14,11 @@ class ProfessionalPDF(FPDF):
 
 def generate_pdf(content: dict, reference_link: str, language: str) -> bytes:
     pdf = ProfessionalPDF()
-    pdf.set_auto_page_break(auto=True, margin=30)
+    pdf.set_auto_page_break(auto=True, margin=25)
 
     pdf.add_font("DejaVu", "", FONT_PATH, uni=True)
 
-    # ---------------- COVER PAGE ----------------
+    # ---------- COVER ----------
     pdf.add_page()
     pdf.set_font("DejaVu", size=22)
     pdf.multi_cell(0, 14, "AI Professional Content Report", align="C")
@@ -29,32 +29,29 @@ def generate_pdf(content: dict, reference_link: str, language: str) -> bytes:
         0,
         10,
         f"Language: {language}\n"
-        "Generated using AI-powered content automation.\n\n"
+        "Generated using AI-powered content automation\n\n"
         "Developed by Akash Bauri",
-        align="C"
+        align="C",
     )
 
-    # ---------------- CONTENT ----------------
+    # ---------- CONTENT ----------
     for section, text in content.items():
         pdf.add_page()
 
         pdf.set_font("DejaVu", size=18)
-        pdf.multi_cell(0, 14, section)
-        pdf.ln(5)
-
-        pdf.set_draw_color(200, 200, 200)
-        pdf.line(30, pdf.get_y(), 180, pdf.get_y())
-        pdf.ln(10)
+        pdf.multi_cell(0, 12, section)
+        pdf.ln(6)
 
         pdf.set_font("DejaVu", size=12)
-        pdf.multi_cell(0, 10, text)
-        pdf.ln(12)
+        pdf.multi_cell(0, 9, text)
+        pdf.ln(10)
 
-        # Clickable reference link
         if reference_link.startswith("http"):
             pdf.set_text_color(0, 0, 255)
-            pdf.set_font("DejaVu", size=11)
-            pdf.cell(0, 10, f"Reference: {reference_link}", link=reference_link)
+            pdf.cell(0, 10, f"🔗 Reference: {reference_link}", link=reference_link)
             pdf.set_text_color(0, 0, 0)
 
-    return pdf.output(dest="S")
+    # 🔑 MOST IMPORTANT LINE
+    pdf_bytes = pdf.output(dest="S").encode("latin-1")
+
+    return pdf_bytes
