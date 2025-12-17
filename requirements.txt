@@ -1,8 +1,4 @@
 streamlit
-crewai
-crewai-tools
-pydantic
 requests
 beautifulsoup4
-fpdf
-pyyaml
+fpdf2
