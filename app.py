@@ -1,97 +1,53 @@
 import streamlit as st
+from helper import load_env
+load_env()
+
+from crew.crew_runner import run_content_crew
 from utils.pdf_generator import generate_pdf
 
-st.set_page_config(page_title="AI Content Creator", layout="wide")
+st.set_page_config(page_title="AI Professional Content Creator", layout="wide")
 
 st.title("🤖 AI Professional Content Creator")
-st.caption("Developed by Akash Bauri | AI Engineer | LLM Automation")
+st.caption("Multi-Agent CrewAI powered content engine")
 
-# ---------------- INPUT ----------------
-topic_or_url = st.text_input(
-    "Enter topic or website URL",
-    placeholder="e.g. AI Technology or https://example.com",
-)
+# ---------- Inputs ----------
+topic = st.text_input("Enter topic or website URL", placeholder="Cybersecurity in India")
+language = st.selectbox("Select language", ["English"])
 
-language = st.selectbox(
-    "Select language for content",
-    ["English", "Hindi", "Bengali"]
-)
+if "crew_result" not in st.session_state:
+    st.session_state.crew_result = None
 
-generate = st.button("Generate Professional Content")
+# ---------- Generate ----------
+if st.button("🚀 Generate Professional Content"):
+    with st.spinner("CrewAI agents are working..."):
+        st.session_state.crew_result = run_content_crew(topic)
 
-# ---------------- LOGIC ----------------
-if generate and topic_or_url:
+# ---------- Display ----------
+if st.session_state.crew_result:
+    result = st.session_state.crew_result
 
-    # ✅ Dynamic professional content
-    article = f"""
-{topic_or_url} is rapidly shaping the modern digital landscape.
+    st.markdown("## 📝 Professional Blog Article")
+    st.markdown(result.article)
 
-In today’s interconnected world, this topic plays a critical role in driving
-innovation, productivity, and long-term economic growth. Organizations across
-industries are leveraging advancements in this domain to remain competitive
-and future-ready.
+    st.markdown("---")
+    st.markdown("## 📣 Social Media Posts")
 
-From business leaders to policymakers, understanding the implications of
-{topic_or_url} is essential for making informed strategic decisions in a
-technology-driven global economy.
-"""
+    for post in result.social_media_posts:
+        st.subheader(post.platform)
+        st.write(post.content)
 
-    linkedin = f"""
-🔍 Professional Insight: {topic_or_url}
-
-This topic is transforming industries by enabling smarter decisions,
-automation, and scalable innovation.
-
-Professionals who stay informed gain a strategic advantage in an
-ever-evolving digital ecosystem.
-"""
-
-    instagram = f"""
-💡 {topic_or_url}
-
-Innovation begins with awareness.
-Understanding trends today prepares us for opportunities tomorrow.
-"""
-
-    facebook = f"""
-📊 Let’s talk about {topic_or_url}
-
-This subject is reshaping how we work, communicate, and innovate.
-Staying informed is the first step toward growth.
-"""
-
-    # ---------------- UI ----------------
-    st.subheader("📝 Professional Blog Article")
-    st.write(article)
-
-    st.subheader("💼 LinkedIn Post")
-    st.write(linkedin)
-
-    st.subheader("📸 Instagram Caption")
-    st.write(instagram)
-
-    st.subheader("👥 Facebook Post")
-    st.write(facebook)
-
-    # ---------------- PDF ----------------
+    # ---------- PDF ----------
     pdf_bytes = generate_pdf(
         content={
-            "Professional Blog Article": article,
-            "LinkedIn Post": linkedin,
-            "Instagram Caption": instagram,
-            "Facebook Post": facebook,
+            "Blog": result.article,
+            **{p.platform: p.content for p in result.social_media_posts},
         },
-        reference_link=topic_or_url,
         language=language,
     )
 
-    # ✅ CRITICAL FIX
-    if pdf_bytes and isinstance(pdf_bytes, (bytes, bytearray)):
-        st.download_button(
-            label="📥 Download Professional PDF",
-            data=pdf_bytes,
-            file_name="AI_Professional_Content_Report.pdf",
-            mime="application/pdf",
-        )
-    else:
-        st.error("PDF generation failed. Please try again.")
+    st.download_button(
+        label="📥 Download Professional PDF",
+        data=pdf_bytes,
+        file_name="AI_Professional_Content.pdf",
+        mime="application/pdf",
+    )
