@@ -1,4 +1,13 @@
 from fpdf import FPDF
+import os
+
+FONT_PATH = os.path.join(
+    os.path.dirname(__file__),
+    "..",
+    "assets",
+    "fonts",
+    "DejaVuSans.ttf"
+)
 
 class UnicodePDF(FPDF):
     pass
@@ -9,8 +18,11 @@ def generate_pdf(content_dict):
     pdf.set_auto_page_break(auto=True, margin=15)
     pdf.add_page()
 
-    # Use a Unicode-safe core font
-    pdf.set_font("Helvetica", size=11)
+    # Register Unicode font
+    pdf.add_font("DejaVu", "", FONT_PATH, uni=True)
+    pdf.add_font("DejaVu", "B", FONT_PATH, uni=True)
+
+    pdf.set_font("DejaVu", size=11)
 
     pdf.multi_cell(
         0,
@@ -21,13 +33,12 @@ def generate_pdf(content_dict):
     )
 
     for section, text in content_dict.items():
-        pdf.set_font("Helvetica", "B", 13)
+        pdf.set_font("DejaVu", "B", 13)
         pdf.cell(0, 8, section, ln=True)
         pdf.ln(2)
 
-        pdf.set_font("Helvetica", size=11)
+        pdf.set_font("DejaVu", size=11)
         pdf.multi_cell(0, 8, text)
         pdf.ln(4)
 
-    # ✅ UTF-8 SAFE OUTPUT (NO latin-1)
     return pdf.output(dest="S").encode("utf-8")
